@@ -31,7 +31,7 @@
     </properties>
     <distributionManagement>
         <repository>
-            <id>gcp-artifact-registry</id>
+            <id>artifact-registry</id>
             <url>https://us-central1-maven.pkg.dev/sukanya-project-452710/sonar</url>
         </repository>
     </distributionManagement>
