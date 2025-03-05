@@ -4,17 +4,19 @@ pipeline {
     tools {
         maven 'maven' // Use the Maven name from Global Tool Config
     }
+
     environment {
         SONARQUBE_URL = 'http://35.209.243.49:9000/'
-        SONARQUBE_TOKEN = credentials('sonarqube-jenkins') // Store in Jenkins Credentials
-        GCP_ACCESS_TOKEN = sh(script: "gcloud auth application-default print-access-token", returnStdout: true).trim()
-
+        SONARQUBE_TOKEN = credentials('sonarqube-jenkins') // Jenkins credentials
+        GCP_REGION = 'us-central1'  // Change if your Artifact Registry is in a different region
+        GCP_PROJECT_ID = 'sukanya-project-452710'  // Replace with your Google Cloud Project ID
+        GCP_REPO = 'maven'  // Replace with your Google Artifact Registry repository name
     }
 
     stages {
         stage('Checkout Code') {
             steps {
-                git branch: 'main', url:'https://github.com/Sukanya992/sonarqube-jenkins.git'
+                git branch: 'main', url: 'https://github.com/Sukanya992/sonarqube-jenkins.git'
             }
         }
 
@@ -31,15 +33,26 @@ pipeline {
                 }
             }
         }
-        stage('Deploy to Google Artifact Registry') {
+
+        stage('Authenticate GCP') {
             steps {
                 withCredentials([file(credentialsId: 'sonar-servicekey', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
                     sh '''
+                    echo "Activating service account..."
                     gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
-                    gcloud auth configure-docker us-central1-maven.pkg.dev --quiet
-                    mvn deploy
+                    gcloud auth configure-docker ${GCP_REGION}-maven.pkg.dev --quiet
                     '''
                 }
             }
         }
+
+        stage('Deploy to Google Artifact Registry') {
+            steps {
+                sh '''
+                echo "Deploying artifact to Google Artifact Registry..."
+                mvn deploy -DaltDeploymentRepository=gcp-artifact-registry::default::https://${GCP_REGION}-maven.pkg.dev/${GCP_PROJECT_ID}/${GCP_REPO}
+                '''
+            }
+        }
+    }
 }
