@@ -10,7 +10,7 @@ pipeline {
         SONARQUBE_TOKEN = credentials('sonarqube-jenkins') // Jenkins credentials
         GCP_REGION = 'us-central1'  // Change if your Artifact Registry is in a different region
         GCP_PROJECT_ID = 'sukanya-project-452710'  // Replace with your Google Cloud Project ID
-        GCP_REPO = 'maven'  // Replace with your Google Artifact Registry repository name
+        GCP_REPO = 'sonar'  // Replace with your Google Artifact Registry repository name
     }
 
     stages {
