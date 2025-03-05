@@ -28,8 +28,8 @@ pipeline {
 
         stage('Authenticate with GCP') {
             steps {
-                withCredentials([file(credentialsId: 'servicekey', variable: 'GOOGLE_CLOUD_SVC')]) {
-                    sh 'gcloud auth activate-service-account --key-file=$GOOGLE_CLOUD_SVC'
+                withCredentials([file(credentialsId: 'servicekey', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
+                    sh 'gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS'
                     sh 'gcloud auth configure-docker us-central1-maven.pkg.dev'
                 }
             }
@@ -37,7 +37,7 @@ pipeline {
 
         stage('Build and Deploy to Artifact Registry') {
             steps {
-                withCredentials([file(credentialsId: 'servicekey', variable: 'GOOGLE_CLOUD_SVC')]) {
+                withCredentials([file(credentialsId: 'servicekey', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
                     sh '''
                     mvn clean package deploy \
                     -DaltDeploymentRepository=google-artifact::https://us-central1-maven.pkg.dev/${GCP_PROJECT_ID}/${ARTIFACT_REGISTRY_REPO}
