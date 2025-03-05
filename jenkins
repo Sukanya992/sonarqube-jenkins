@@ -35,25 +35,6 @@
             }
         }
 
-        stage('Configure Maven Settings for Artifact Registry') {
-            steps {
-                script {
-                    def settingsXmlPath = "${HOME}/.m2/settings.xml"
-                    def mavenSettings = """
-<servers>
-  <server>
-    <id>google-artifact</id>
-    <username>oauth2accesstoken</username>
-    <password>\${env.GOOGLE_APPLICATION_CREDENTIALS}</password>
-  </server>
-</servers>
-                    """
-                    // Write the maven settings to the settings.xml file
-                    writeFile file: settingsXmlPath, text: mavenSettings
-                }
-            }
-        }
-
         stage('Build and Deploy to Artifact Registry') {
             steps {
                 withCredentials([file(credentialsId: 'servicekey', variable:'GOOGLE_APPLICATION_CREDENTIALS')]) {
