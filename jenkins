@@ -56,7 +56,6 @@ pipeline {
             steps {
                 sh '''
                 echo "Deploying artifact to Google Artifact Registry..."
-                //mvn deploy -DaltDeploymentRepository=gcp-artifact-registry::default::https://${GCP_REGION}-maven.pkg.dev/${GCP_PROJECT_ID}/${ARTIFACT_REGISTRY_REPO}
                 mvn deploy 
                 '''
 
