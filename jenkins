@@ -52,35 +52,26 @@ pipeline {
                 }
             }
         }
-
-        stage('Push Artifact to GCP Artifact Registry') {
+    stages {
+        stage('Authenticate with GCP') {
             steps {
-withCredentials([file(credentialsId: 'servicekey', variable: 'GOOGLE_CLOUD_SVC')]) {
-    echo "Region: ${GOOGLE_CLOUD_REGION}"
-
-                script {
-                    // Define the path to your packaged artifact
-                    def artifactFile = 'target/sonarqube-demo-1.0-SNAPSHOT.jar'
-
-                    // Define the Artifact Registry URL
-                    def artifactRegistryUrl = "https://us-central1-maven.pkg.dev/sukanya-project-452710/sonar"
-
-                    // Push the artifact to the Artifact Registry
-                    sh """
-                    gcloud auth configure-docker ${GOOGLE_CLOUD_REGION}-docker.pkg.dev
-                    mvn deploy:deploy-file \
-                        -Dfile=${artifactFile} \
-                        -DrepositoryId=gcp-artifact-registry \
-                        -Durl=https://${artifactRegistryUrl} \
-                        -DgroupId=com.example \
-                        -DartifactId=sonarqube-demo \
-                        -Dversion=1.0.0 \
-                        -Dpackaging=jar
-                    """
-                 }
+                withCredentials([file(credentialsId: 'servicekey', variable: 'GOOGLE_CLOUD_SVC')]) {
+                    sh 'gcloud auth activate-service-account --key-file=$GOOGLE_CLOUD_SVC'
+                    sh 'gcloud auth configure-docker us-central1-maven.pkg.dev'
                 }
+            }
+        }
+        stage('Build and Deploy to Artifact Registry') {
+            steps {
+                sh '''
+mvn clean package deploy \
+    -DaltDeploymentRepository=google-artifact::default::https://us-central1-maven.pkg.dev/$GCP_PROJECT_ID/$ARTIFACT_REGISTRY_REPO
+                '''
             }
         }
     }
 }
+
+    
+
 
