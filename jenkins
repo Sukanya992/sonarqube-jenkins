@@ -40,7 +40,7 @@ pipeline {
                     sh '''
                     echo "Activating service account..."
                     gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
-                    gcloud auth configure-docker ${GCP_REGION}-maven.pkg.dev --quiet
+                    gcloud config set project ${GCP_PROJECT_ID}
                     '''
                 }
             }
