@@ -1,7 +1,9 @@
 pipeline {
     agent any
 
-    
+    tools {
+        maven 'maven-3.9.9' // Use the Maven name from Global Tool Config
+    }
     environment {
         SONARQUBE_URL = 'http://35.209.243.49:9000/'
         SONARQUBE_TOKEN = credentials('sonarqube-jenkins') // Store in Jenkins Credentials
