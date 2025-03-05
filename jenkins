@@ -52,15 +52,29 @@ pipeline {
             }
         }
 
-        stage('Deploy to Google Artifact Registry') {
+        stage('Push Artifact to GCP Artifact Registry') {
             steps {
-                sh '''
-                echo "Deploying artifact to Google Artifact Registry..."
-                mvn deploy 
-                '''
+                script {
+                    // Define the path to your packaged artifact
+                    def artifactFile = 'target/sonarqube-demo-1.0-SNAPSHOT.jar
 
+                    // Define the Artifact Registry URL
+                    def artifactRegistryUrl = "https://us-central1-maven.pkg.dev/sukanya-project-452710/sonar"
+
+                    // Push the artifact to the Artifact Registry
+                    sh """
+                    gcloud auth configure-docker ${GOOGLE_CLOUD_REGION}-docker.pkg.dev
+                    mvn deploy:deploy-file \
+                        -Dfile=${artifactFile} \
+                        -DrepositoryId=gcp-artifact-registry \
+                        -Durl=https://${artifactRegistryUrl} \
+                        -DgroupId=com.example \
+                        -DartifactId=sonarqube-demo \
+                        -Dversion=1.0.0 \
+                        -Dpackaging=jar
+                    """
+                }
             }
-        }
     }
 }
 
