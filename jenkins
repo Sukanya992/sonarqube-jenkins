@@ -7,6 +7,8 @@ pipeline {
     environment {
         SONARQUBE_URL = 'http://35.209.243.49:9000/'
         SONARQUBE_TOKEN = credentials('sonarqube-jenkins') // Store in Jenkins Credentials
+        GCP_ACCESS_TOKEN = sh(script: "gcloud auth application-default print-access-token", returnStdout: true).trim()
+
     }
 
     stages {
@@ -29,5 +31,14 @@ pipeline {
                 }
             }
         }
+        stage('Deploy to Google Artifact Registry') {
+            steps {
+                withCredentials([file(credentialsId: 'sonar-servicekey', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
+                    sh '''
+                    gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
+                    gcloud auth configure-docker us-central1-maven.pkg.dev --quiet
+                    mvn deploy
+                    '''
+                }
     }
 }
