@@ -2,15 +2,15 @@ pipeline {
     agent any
 
     tools {
-        maven 'maven' // Use the Maven name from Global Tool Config
+        maven 'maven' // Ensure Maven is configured in Jenkins
     }
 
     environment {
         SONARQUBE_URL = 'http://35.209.243.49:9000/'
-        SONARQUBE_TOKEN = credentials('sonarqube-jenkins') // Jenkins credentials
+        SONARQUBE_TOKEN = credentials('sonarqube-jenkins') // Stored in Jenkins credentials
         GCP_REGION = 'us-central1'  // Change if your Artifact Registry is in a different region
         GCP_PROJECT_ID = 'sukanya-project-452710'  // Replace with your Google Cloud Project ID
-        GCP_REPO = 'sonar'  // Replace with your Google Artifact Registry repository name
+        GCP_REPO = 'sonar'  // Replace with your Artifact Registry repository name
     }
 
     stages {
@@ -29,20 +29,23 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('SonarQube') {
-                    sh "mvn sonar:sonar -Dsonar.projectKey=sonar-jenkins -Dsonar.host.url=${SONARQUBE_URL} -Dsonar.login=${SONARQUBE_TOKEN}"
+                    sh '''
+                    mvn sonar:sonar \
+                        -Dsonar.projectKey=sonar-jenkins \
+                        -Dsonar.host.url=${SONARQUBE_URL} \
+                        -Dsonar.login=${SONARQUBE_TOKEN}
+                    '''
                 }
             }
         }
 
-        stage('Authenticate GCP') {
+        stage('Authenticate with GCP') {
             steps {
-                withCredentials([file(credentialsId: 'sonar-servicekey', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
-                    sh '''
-                    echo "Activating service account..."
-                    gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
-                    gcloud config set project ${GCP_PROJECT_ID}
-                    '''
-                }
+                sh '''
+                echo "Authenticating with GCP..."
+                gcloud auth application-default login --quiet
+                gcloud config set project ${GCP_PROJECT_ID}
+                '''
             }
         }
 
@@ -50,7 +53,7 @@ pipeline {
             steps {
                 sh '''
                 echo "Deploying artifact to Google Artifact Registry..."
-                mvn deploy -DaltDeploymentRepository=gcp-artifact-registry::default::https://${GCP_REGION}-maven.pkg.dev/${GCP_PROJECT_ID}/${GCP_REPO}
+                mvn deploy -DaltDeploymentRepository=gcp-artifact-registry::https://${GCP_REGION}-maven.pkg.dev/${GCP_PROJECT_ID}/${GCP_REPO}
                 '''
             }
         }
