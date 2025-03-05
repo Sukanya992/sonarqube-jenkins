@@ -63,6 +63,23 @@ pipeline {
         stage('Build and Deploy to Artifact Registry') {
             steps {
                 withCredentials([file(credentialsId: 'servicekey', variable: 'GOOGLE_CLOUD_SVC')]) {
+                 script {
+                        // Base64 encode the service key file dynamically in the pipeline
+                        def serviceKeyBase64 = sh(script: "cat $GOOGLE_CLOUD_SVC | base64 -w 0", returnStdout: true).trim()
+
+                        // Create the settings.xml dynamically with the encoded key
+                        writeFile file: "${HOME}/.m2/settings.xml", text: """
+                        <settings>
+                            <servers>
+                                <server>
+                                    <id>google-artifact</id>
+                                    <username>_json_key</username>
+                                    <password>${serviceKeyBase64}</password>
+                                </server>
+                            </servers>
+                        </settings>
+                        """
+                    }
 
                 sh '''
 mvn clean package deploy \
