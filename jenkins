@@ -9,7 +9,7 @@
         GOOGLE_APPLICATION_CREDENTIALS = credentials('servicekey') // Ensure this exists in Jenkins credentials
         GCP_REGION = 'us-central1'  // Change if your Artifact Registry is in a different region
         GCP_PROJECT_ID = 'sukanya-project-452710'  // Replace with your Google Cloud Project ID
-        ARTIFACT_REGISTRY_REPO = 'sonar'  // Replace with your Artifact Registry repository name
+        ARTIFACT_REGISTRY_REPO = 'maven'  // Replace with your Artifact Registry repository name
         GOOGLE_CLOUD_REGION = 'us-central1'
     }
 
@@ -59,7 +59,7 @@
                 withCredentials([file(credentialsId: 'servicekey', variable:'GOOGLE_APPLICATION_CREDENTIALS')]) {
                     sh '''
                     mvn clean package deploy \
-                    -DaltDeploymentRepository=google-artifact::https://us-central1-maven.pkg.dev/sukanya-project-452710/sonar
+                    -DaltDeploymentRepository=google-artifact::https://us-central1-maven.pkg.dev/sukanya-project-452710/maven
                     '''
                 }
             }
