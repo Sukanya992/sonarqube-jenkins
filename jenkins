@@ -1,4 +1,4 @@
-pipeline {
+ pipeline {
     agent any
 
     tools {
@@ -22,25 +22,44 @@ pipeline {
 
         stage('Build & Test') {
             steps {
-                sh 'mvn clean verify' // Clean and verify the project, including tests
+                sh 'mvn clean verify'
             }
         }
 
         stage('Authenticate with GCP') {
             steps {
-                withCredentials([file(credentialsId: 'servicekey', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
-                    sh 'gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS'
+                withCredentials([file(credentialsId: 'servicekey', variable: 'GOOGLE_CLOUD_SVC')]) {
+                    sh 'gcloud auth activate-service-account --key-file=$GOOGLE_CLOUD_SVC'
                     sh 'gcloud auth configure-docker us-central1-maven.pkg.dev'
+                }
+            }
+        }
+
+        stage('Configure Maven Settings for Artifact Registry') {
+            steps {
+                script {
+                    def settingsXmlPath = "${HOME}/.m2/settings.xml"
+                    def mavenSettings = """
+<servers>
+  <server>
+    <id>google-artifact</id>
+    <username>oauth2accesstoken</username>
+    <password>\${env.GOOGLE_APPLICATION_CREDENTIALS}</password>
+  </server>
+</servers>
+                    """
+                    // Write the maven settings to the settings.xml file
+                    writeFile file: settingsXmlPath, text: mavenSettings
                 }
             }
         }
 
         stage('Build and Deploy to Artifact Registry') {
             steps {
-                withCredentials([file(credentialsId: 'servicekey', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
+                withCredentials([file(credentialsId: 'servicekey', variable: 'GOOGLE_CLOUD_SVC')]) {
                     sh '''
                     mvn clean package deploy \
-                    -DaltDeploymentRepository=google-artifact::https://us-central1-maven.pkg.dev/${GCP_PROJECT_ID}/${ARTIFACT_REGISTRY_REPO}
+                    -DaltDeploymentRepository=google-artifact::https://us-central1-maven.pkg.dev/sukanya-project-452710/sonar
                     '''
                 }
             }
