@@ -62,10 +62,13 @@ pipeline {
         }
         stage('Build and Deploy to Artifact Registry') {
             steps {
+                withCredentials([file(credentialsId: 'servicekey', variable: 'GOOGLE_CLOUD_SVC')]) {
+
                 sh '''
 mvn clean package deploy \
     -DaltDeploymentRepository=google-artifact::default::https://us-central1-maven.pkg.dev/$GCP_PROJECT_ID/$ARTIFACT_REGISTRY_REPO
                 '''
+              } 
             }
         }
     }
