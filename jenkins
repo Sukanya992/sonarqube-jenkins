@@ -12,6 +12,7 @@ pipeline {
         GCP_REGION = 'us-central1'  // Change if your Artifact Registry is in a different region
         GCP_PROJECT_ID = 'sukanya-project-452710'  // Replace with your Google Cloud Project ID
         ARTIFACT_REGISTRY_REPO = 'sonar'  // Replace with your Artifact Registry repository name
+        GOOGLE_CLOUD_REGION = 'us-central1'
     }
 
     stages {
@@ -54,6 +55,9 @@ pipeline {
 
         stage('Push Artifact to GCP Artifact Registry') {
             steps {
+withCredentials([string(credentialsId: 'servicekey', variable: 'GOOGLE_CLOUD_REGION')]) {
+    echo "Region: ${GOOGLE_CLOUD_REGION}"
+
                 script {
                     // Define the path to your packaged artifact
                     def artifactFile = 'target/sonarqube-demo-1.0-SNAPSHOT.jar'
@@ -73,6 +77,7 @@ pipeline {
                         -Dversion=1.0.0 \
                         -Dpackaging=jar
                     """
+                 }
                 }
             }
         }
