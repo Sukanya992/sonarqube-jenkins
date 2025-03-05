@@ -6,8 +6,6 @@ pipeline {
     }
 
     environment {
-        SONARQUBE_URL = 'http://35.209.243.49:9000/'
-        SONARQUBE_TOKEN = credentials('sonarqube-jenkins') // Stored in Jenkins credentials
         GOOGLE_APPLICATION_CREDENTIALS = credentials('servicekey') // Ensure this exists in Jenkins credentials
         GCP_REGION = 'us-central1'  // Change if your Artifact Registry is in a different region
         GCP_PROJECT_ID = 'sukanya-project-452710'  // Replace with your Google Cloud Project ID
@@ -22,36 +20,12 @@ pipeline {
             }
         }
 
-        stage('Setup GCP Authentication') {
-            steps {
-                sh '''
-                gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
-                export GCP_ACCESS_TOKEN=$(gcloud auth print-access-token)
-                gcloud config set project $GCP_PROJECT_ID
-                gcloud auth configure-docker $GCP_REGION-docker.pkg.dev --quiet
-  
-                '''
-            }
-        }
-
         stage('Build & Test') {
             steps {
-                sh 'mvn clean verify'
+                sh 'mvn clean verify' // Clean and verify the project, including tests
             }
         }
 
-        stage('SonarQube Analysis') {
-            steps {
-                withSonarQubeEnv('SonarQube') {
-                    sh '''
-                    mvn sonar:sonar \
-                        -Dsonar.projectKey=sonar-jenkins \
-                        -Dsonar.host.url=${SONARQUBE_URL} \
-                        -Dsonar.login=${SONARQUBE_TOKEN}
-                    '''
-                }
-            }
-        }
         stage('Authenticate with GCP') {
             steps {
                 withCredentials([file(credentialsId: 'servicekey', variable: 'GOOGLE_CLOUD_SVC')]) {
@@ -60,20 +34,20 @@ pipeline {
                 }
             }
         }
+
         stage('Build and Deploy to Artifact Registry') {
             steps {
                 withCredentials([file(credentialsId: 'servicekey', variable: 'GOOGLE_CLOUD_SVC')]) {
-                 
-
-                sh '''
-mvn clean package deploy \
--DaltDeploymentRepository=google-artifact::https://us-central1-maven.pkg.dev/sukanya-project-452710/sonar
-                '''
-              } 
+                    sh '''
+                    mvn clean package deploy \
+                    -DaltDeploymentRepository=google-artifact::https://us-central1-maven.pkg.dev/${GCP_PROJECT_ID}/${ARTIFACT_REGISTRY_REPO}
+                    '''
+                }
             }
         }
     }
 }
+
 
     
 
