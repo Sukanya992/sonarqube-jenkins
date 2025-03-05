@@ -40,7 +40,7 @@
                 withCredentials([file(credentialsId: 'servicekey', variable:'GOOGLE_APPLICATION_CREDENTIALS')]) {
                     sh '''
                     mvn clean package deploy \
-                    -DaltDeploymentRepository=gcp-artifact-registry::https://us-central1-maven.pkg.dev/sukanya-project-452710/maven
+                    -DaltDeploymentRepository=artifact-registry::https://us-central1-maven.pkg.dev/sukanya-project-452710/sonar
                     '''
                 }
             }
