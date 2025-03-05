@@ -26,6 +26,9 @@ pipeline {
                 sh '''
                 gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
                 export GCP_ACCESS_TOKEN=$(gcloud auth print-access-token)
+                gcloud config set project $GCP_PROJECT_ID
+                gcloud auth configure-docker $GCP_REGION-docker.pkg.dev --quiet
+  
                 '''
             }
         }
