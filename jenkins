@@ -67,7 +67,7 @@ pipeline {
 
                 sh '''
 mvn clean package deploy \
--DaltDeploymentRepository=google-artifact::default::https://us-central1-maven.pkg.dev/sukanya-project-452710/sonar
+-DaltDeploymentRepository=google-artifact::https://us-central1-maven.pkg.dev/sukanya-project-452710/sonar
                 '''
               } 
             }
