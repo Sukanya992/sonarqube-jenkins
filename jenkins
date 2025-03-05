@@ -8,7 +8,7 @@ pipeline {
     environment {
         SONARQUBE_URL = 'http://35.209.243.49:9000/'
         SONARQUBE_TOKEN = credentials('sonarqube-jenkins') // Stored in Jenkins credentials
-        GOOGLE_APPLICATION_CREDENTIALS = credentials('gcp-service-account') // Ensure this exists in Jenkins credentials
+        GOOGLE_APPLICATION_CREDENTIALS = credentials('servicekey') // Ensure this exists in Jenkins credentials
         GCP_REGION = 'us-central1'  // Change if your Artifact Registry is in a different region
         GCP_PROJECT_ID = 'sukanya-project-452710'  // Replace with your Google Cloud Project ID
         ARTIFACT_REGISTRY_REPO = 'sonar'  // Replace with your Artifact Registry repository name
