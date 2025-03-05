@@ -55,7 +55,7 @@ pipeline {
 
         stage('Push Artifact to GCP Artifact Registry') {
             steps {
-withCredentials([string(credentialsId: 'servicekey', variable: 'GOOGLE_CLOUD_SVC')]) {
+withCredentials([file(credentialsId: 'servicekey', variable: 'GOOGLE_CLOUD_SVC')]) {
     echo "Region: ${GOOGLE_CLOUD_REGION}"
 
                 script {
