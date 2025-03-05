@@ -30,10 +30,10 @@
         <sonar.host.url>http://your-sonarqube-server:9000</sonar.host.url>
     </properties>
     <distributionManagement>
-    <repository>
-        <id>gcp-artifact-registry</id>
-        <url>https://us-central1-maven.pkg.dev/sukanya-project-452710/sonar</url>
-    </repository>
+        <repository>
+            <id>gcp-artifact-registry</id>
+            <url>https://us-central1-maven.pkg.dev/sukanya-project-452710/sonar</url>
+        </repository>
     </distributionManagement>
 
 </project>
