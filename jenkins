@@ -56,7 +56,7 @@ pipeline {
             steps {
                 script {
                     // Define the path to your packaged artifact
-                    def artifactFile = 'target/sonarqube-demo-1.0-SNAPSHOT.jar
+                    def artifactFile = 'target/sonarqube-demo-1.0-SNAPSHOT.jar'
 
                     // Define the Artifact Registry URL
                     def artifactRegistryUrl = "https://us-central1-maven.pkg.dev/sukanya-project-452710/sonar"
